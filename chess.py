@@ -14,14 +14,18 @@ def load_pieces():
     for piece in pieces:
         piece_images[piece] = pygame.transform.smoothscale(pygame.image.load(f'images/{piece}.png'), (square_size, square_size))
 
-def draw_board(win):
+def draw_board(win, selected=None):
     """Draws chess board with pygame."""
     white = (219, 198, 153)
     black = (166, 135, 98)
     for r in range(rows):
-        for c in range(cols):
+        for c in range(cols): 
             color = white if (r + c) % 2 == 0 else black
             pygame.draw.rect(win, color, (c * square_size, r * square_size, square_size, square_size))
+
+    if selected:
+        r, c = selected
+        pygame.draw.rect(win, (204, 60, 58), (c * square_size, r * square_size, square_size, square_size), 5)
 
 def draw_pieces(win, board):
     """Draws chess pieces on the board with pygame."""
@@ -30,6 +34,43 @@ def draw_pieces(win, board):
             piece = board[r][c]
             if piece != "--":
                 win.blit(piece_images[piece], (c * square_size, r * square_size))
+
+def draw_ui(win, turn, captured_pieces, check, invalid_move, game_over):
+    """Draws user interface including turn, invalid move, check, and captured pieces indicators."""
+    pygame.draw.rect(win, (45, 36, 30), (0, height, width, 100))
+    font = pygame.font.SysFont('cambria', 24)
+    red = (196, 23, 23)
+
+    # Turn indicator
+    if turn == 'w':
+        if game_over:
+            turn_text = "Black wins!"
+        else:
+            turn_text = "White's turn."
+    else:
+        if game_over:
+            turn_text = "White wins!"
+        else:
+            turn_text = "Black's turn."
+
+    text = font.render(turn_text, True, (219, 198, 153))
+    win.blit(text, (25, height + 15))
+
+    # Check indicator
+    if check and not game_over:
+        check_text = font.render("Check!", True, red)
+        win.blit(check_text, (25, height + 50))
+
+    # Invalid move indicator
+    if invalid_move:
+        invalid_text = font.render("Invalid Move!", True, red)
+        win.blit(invalid_text, (175, height + 15))
+
+    # Captured pieces indicators
+    for i, piece in enumerate(captured_pieces['w']):
+        win.blit(pygame.transform.smoothscale(piece_images[piece], (40, 40)), (400 + (i * 25), height + 10))
+    for i, piece in enumerate(captured_pieces['b']):
+        win.blit(pygame.transform.smoothscale(piece_images[piece], (40, 40)), (400 + (i * 25), height + 50))
 
 def create_board():
     """Creates a starting chess board."""
@@ -52,7 +93,8 @@ def clear_path(board, start_pos, end_pos):
     row_step = (end_row - start_row) // max(1, abs(end_row - start_row)) if start_row != end_row else 0
     col_step = (end_col - start_col) // max(1, abs(end_col - start_col)) if start_col != end_col else 0
 
-    row, col = start_row + row_step, start_col + col_step
+    row = start_row + row_step
+    col = start_col + col_step
     while (row, col) != (end_row, end_col):
         if board[row][col] != "--":
             return False
@@ -122,7 +164,7 @@ def valid_move(board, start_pos, end_pos, turn):
             if (clear_path(board, start_pos, end_pos)):
                 return True
     
-    # King movement
+    # King movement check
     elif piece_type == "k":
         if (row_diff <= 1) and (col_diff <= 1):
             return True
@@ -146,45 +188,85 @@ def check_king(board, turn):
         for c in range(cols):
             piece = board[r][c]
             if (piece != "--") and (piece[0] != turn):
-                if valid_move(board, (r, c), king_pos, turn):
+                if valid_move(board, (r, c), king_pos, piece[0]):
                     return True
     
     return False
 
+def has_legal_moves(board, turn):
+    for r in range(rows):
+        for c in range(cols):
+            if board[r][c][0] == turn:
+                for r2 in range(rows):
+                    for c2 in range(cols):
+                        if valid_move(board, (r, c), (r2, c2), turn):
+                            temp = [row[:] for row in board]
+                            temp[r2][c2] = temp[r][c]
+                            temp[r][c] = "--"
+                            if not check_king(temp, turn):
+                                return True
+    return False
+
 def main():
-    win = pygame.display.set_mode((width, height))
+    win = pygame.display.set_mode((width, height + 100))
     pygame.display.set_caption("Chess")
     pygame.display.set_icon(pygame.image.load(f'images/chess_board.png'))
     clock = pygame.time.Clock()
-    board = create_board()
+
     load_pieces()
-    running = True
-    selected_piece = None
+    board = create_board()
+    captured_pieces = {'w':[], 'b':[]}
+    selected = None
     turn = "w"
+    running = True
+    invalid_move = False
+    check = False
+    game_over = False
 
     while running:
         clock.tick(30)
+        draw_board(win, selected)
+        draw_pieces(win, board)
+        draw_ui(win, turn, captured_pieces, check, invalid_move, game_over)
+        pygame.display.flip()
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+
+            if not game_over and event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 col, row = x // square_size, y // square_size
-                if selected_piece:
-                    if valid_move(board, selected_piece, (row, col), turn):
-                        board[row][col] = board[selected_piece[0]][selected_piece[1]]
-                        board[selected_piece[0]][selected_piece[1]] = "--"
-                        
-                        turn = "b" if turn == "w" else "w"
 
-                    selected_piece = None
+                if selected:
+                    if (row, col) != selected:
+                        piece = board[selected[0]][selected[1]]
+                        if valid_move(board, selected, (row, col), turn):
+                            old = board[row][col]
+                            board[row][col] = piece
+                            board[selected[0]][selected[1]] = "--"
+
+                            if check_king(board, turn):
+                                board[selected[0]][selected[1]] = piece
+                                board[row][col] = old
+                                invalid_move = True
+                            else:
+                                if old != "--":
+                                    captured_pieces[turn].append(old)
+
+                                turn = "b" if turn == "w" else "w"
+
+                                check = check_king(board, turn)
+                                if check and not has_legal_moves(board, turn):
+                                    game_over = True
+
+                                invalid_move = False
+                        else:
+                            invalid_move = True
+                    selected = None
                 else:
-                    if (board[row][col] != "--") and (board[row][col][0] == turn):
-                        selected_piece = (row, col)
-
-        draw_board(win)
-        draw_pieces(win, board)
-        pygame.display.flip()
+                    if board[row][col] != "--" and board[row][col][0] == turn:
+                        selected = (row, col)
 
     pygame.quit()
     sys.exit()
