@@ -194,6 +194,7 @@ def check_king(board, turn):
     return False
 
 def has_legal_moves(board, turn):
+    """Determines whether the king has legal moves left on the board during check conditions."""
     for r in range(rows):
         for c in range(cols):
             if board[r][c][0] == turn:

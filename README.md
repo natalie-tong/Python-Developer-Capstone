@@ -1,21 +1,31 @@
 ### Python Developer Capstone Project - Natalie Tong
 
-# Chess
-Insert chessboard image
+# PyChess
+This program was created independently in Python as part of the Python Developer Capstone Project. This project demonstrates a comprehensive understanding of Python as well as experience in Python modules such as pygame. 
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+[[chess_preview.png]]
 
-Insert movement gif
-
-Insert win condition gif
-
-## How it works
 This chess game was created with the Python module pygame, which creates a graphical interface for the game. The chess piece icons for this program were created by smalllikeart on Flaticon and modified slightly for the purposes of this game. The color designs are original.
 
+[[chess.gif]]]
+
 ## How to play
+The game is played with only the mouse. When it is the player's turn, clicking on a chess piece on the board will select it, and the player can then click on any available location to move the piece or capture an enemy piece as long as it is a valid move for the piece type. After the player's turn is completed, it becomes the opponent's turn; the game alternates turns between the players until a checkmate condition has been reached and the game concludes.
+
+[[check.png]]
+
+## Installation instructions
+To clone this repository, open a Git Bash terminal and use the following command:
+`git clone https://github.com/natalie-tong/Python-Developer-Capstone`
+This creates a local clone of the repository on your machine.
+
 The program requires importing the pygame module and the sys module. 
 
-The game is played with only the mouse. When it is the player's turn, clicking on a chess piece on the board will select it, and the player can then click on any available location to move the piece there or capture an enemy piece as long as it is a valid move for the piece type. After the player's turn is completed, it becomes the opponent's turn; the game alternates turns between the players until a checkmate condition has been reached and the game concludes.
+Before installing pygame, Python must be installed on your machine. pip must also be installed, though it is generally pre-installed with Python. The pygame module can be installed by using the following command:
+`pip install pygame`
+For more information, visit https://pypi.org/project/pygame/.
+
+To run the program, run the command `python chess.py` in a terminal.
 
 # Credits
 <a href="https://www.flaticon.com/free-icons/chess" title="chess icons">Chess icons created by smalllikeart - Flaticon</a>
