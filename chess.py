@@ -12,7 +12,7 @@ def load_pieces():
     """Loads chess piece images with pygame."""
     pieces = ['wp', 'bp', 'wr', 'br', 'wn', 'bn', 'wb', 'bb', 'wq', 'bq', 'wk', 'bk']
     for piece in pieces:
-        piece_images[piece] = pygame.transform.smoothscale(pygame.image.load(f'images/{piece}.png'), (square_size, square_size))
+        piece_images[piece] = pygame.transform.smoothscale(pygame.image.load(f'icons/{piece}.png'), (square_size, square_size))
 
 def draw_board(win, selected=None):
     """Draws chess board with pygame."""
@@ -211,7 +211,7 @@ def has_legal_moves(board, turn):
 def main():
     win = pygame.display.set_mode((width, height + 100))
     pygame.display.set_caption("Chess")
-    pygame.display.set_icon(pygame.image.load(f'images/chess_board.png'))
+    pygame.display.set_icon(pygame.image.load(f'icons/chess_board.png'))
     clock = pygame.time.Clock()
 
     load_pieces()
