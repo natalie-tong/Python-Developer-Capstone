@@ -34,4 +34,4 @@ python chess.py
 ```
 
 # Credits
-<a href="https://www.flaticon.com/free-icons/chess" title="chess icons">Chess icons created by smalllikeart - Flaticon</a>
+<a href="https://www.flaticon.com/authors/smalllikeart" title="chess icons">Chess icons created by smalllikeart - Flaticon</a>
